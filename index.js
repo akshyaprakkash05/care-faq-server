@@ -33,7 +33,7 @@ async function fetchFAQs(query) {
         result.push(`❌ No match found at ${source.name}`);
       }
     } catch (err) {
-      result.push(`⚠️ Error fetching from ${source.name}`);
+      result.push(`⚠️ Error accessing ${source.name}`);
     }
   }
 
@@ -47,9 +47,16 @@ app.get('/sse', async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders(); // this is important!
+
   res.write(`data: ${JSON.stringify({ answer })}\n\n`);
+
+  // Keep connection open a bit longer for ChatGPT
+  setTimeout(() => {
+    res.end();
+  }, 3000);
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server is live at http://localhost:${PORT}/sse`);
+  console.log(`🚀 Server running at http://localhost:${PORT}/sse`);
 });
