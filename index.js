@@ -5,7 +5,14 @@ const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 app.use(cors());
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*'); // allow all
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 
 const sources = [
   {
@@ -44,10 +51,11 @@ app.get('/sse', async (req, res) => {
   const question = req.query.q || 'No question';
   const answer = await fetchFAQs(question);
 
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders(); // this is important!
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+  });
 
   res.write(`data: ${JSON.stringify({ answer })}\n\n`);
 
